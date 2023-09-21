@@ -32,6 +32,17 @@ export function saveMenuItems(menuItems) {
     // 2. Implement a single SQL statement to save all menu data in a table called menuitems.
     // Check the createTable() function above to see all the different columns the table has
     // Hint: You need a SQL statement to insert multiple rows at once.
+    menuItems.forEach(element => {
+      const query = 'INSERT INTO menuItems (id,uuid,title,price,category) VALUES (?, ?, ?, ?, ?)'
+      tx.executeSql(query,[element?.id, element?.id, element?.title, element?.price, element?.category?.title],
+        (_,{rows}) => {
+          console.log("Saved Successfully");
+        },
+        (error) => {
+          console.log("Error : ", error);
+        }
+        )
+    });
   });
 }
 
@@ -57,6 +68,24 @@ export function saveMenuItems(menuItems) {
  */
 export async function filterByQueryAndCategories(query, activeCategories) {
   return new Promise((resolve, reject) => {
-    resolve(SECTION_LIST_MOCK_DATA);
+    db.transaction(tx => {
+      const result = []
+      let queryString = "?"
+      activeCategories.forEach(ele=>{
+        queryString += ", ?"
+      })
+      tx.executeSql(
+        "select * from menuItems where category in ("+ queryString +")",
+        [...activeCategories],
+        (_,{rows}) => {
+          rows._array.forEach(ele => {
+            if(ele.title.toLowerCase().includes(query.toLowerCase())){
+              result.push(ele)
+            }
+          })
+          resolve(result);
+        }
+      )
+    })
   });
 }
