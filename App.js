@@ -39,10 +39,11 @@ export default function App() {
   );
 
   const fetchData = async() => {
+    let data = []
     try{
-      const response = await fetch(API_URL)
-      const jsonData = await response?.json()
-      setData(jsonData)
+      const jsonData = await fetch(API_URL)
+      data = await jsonData?.json()
+      
     }catch(error){
       console.error(error)
     }
